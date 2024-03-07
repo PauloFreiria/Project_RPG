@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float velocity;
 
-    private Vector2 moveDirection;
+    private Vector3 moveDirection;
 
     private void Start()
     {
@@ -22,7 +22,11 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMove()
     {
-        moveDirection = GameManager.Instance.inputManager.MoveDirection;
+        
+        Vector2 inputData = GameManager.Instance.inputManager.MoveDirection;
+        moveDirection.x = inputData.x;
+        moveDirection.z= inputData.y;
+
         print(moveDirection);
     }
 
