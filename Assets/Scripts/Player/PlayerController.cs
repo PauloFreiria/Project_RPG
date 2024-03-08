@@ -38,25 +38,52 @@ public class PlayerController : MonoBehaviour
         Vector2 inputData = GameManager.Instance.inputManager.MoveDirection;
         moveDirection.x = inputData.x;
         moveDirection.z= inputData.y;
+        Vector3 cameraRelativeMovement = ConvertMoveDirectionToCameraSpace(moveDirection);
 
-        characterController.Move(moveDirection * velocity * Time.deltaTime);
-        RotatePlayerAccordingToInput();
+
+
+        characterController.Move(cameraRelativeMovement * velocity * Time.deltaTime);
+        RotatePlayerAccordingToInput(cameraRelativeMovement);
         print(moveDirection);
     }
-    private void RotatePlayerAccordingToInput()
+    private void RotatePlayerAccordingToInput(Vector3 cameraRelativeMovement)
     {
         if (moveDirection == Vector3.zero) return;
 
         Vector3 pointToLookAt;
-        pointToLookAt.x = moveDirection.x;
+        pointToLookAt.x = cameraRelativeMovement.x;
         pointToLookAt.y = 0;
-        pointToLookAt.z = moveDirection.z;
+        pointToLookAt.z = cameraRelativeMovement.z;
 
         Quaternion currentRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.LookRotation(pointToLookAt);
 
-        transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationVelocity * Time.deltaTime);
+        if (moveDirection != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(pointToLookAt); 
+            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationVelocity * Time.deltaTime);
+
+        }
+
     }
+
+
+    private Vector3 ConvertMoveDirectionToCameraSpace(Vector3 moveDirection)
+    {
+        Vector3 cameraForward = Camera.main.transform.forward;
+        Vector3 cameraRight = Camera.main.transform.right;
+
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+
+        Vector3 cameraForwardZProduct = cameraForward * moveDirection.z;
+        Vector3 cameraRightXProduct = cameraRight * moveDirection.x;
+
+        Vector3 directionToMovePlayer = cameraForwardZProduct + cameraRightXProduct;
+
+        return directionToMovePlayer;
+
+    }
+
 
     private void HandleOnJump()
     {
